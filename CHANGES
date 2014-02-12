@@ -1,3 +1,53 @@
+3.8.0 -> 3.8.1
+	- fixed 1 memory leak in prerotateSingleLog
+	- another fixes for Solaris
+	- fixed HP-UX compilation and default config 
+	- do not redirect logrotate errors to /dev/null in cron script
+	- fixed "size" directive parsing
+	- handle situation when acl_get_fd is supported, but acl_set_fd is not
+	- added "maxsize" directive (see man page)
+
+3.7.9 -> 3.8.0
+	- added "dateyesterday" option (see man page)
+	- fixed crash when config file had exactly 4096*N bytes
+	- added WITH_ACL make option to link against -lacl and preserve ACLs
+	  during rotation
+	- added "su" option to define user/group for rotation. Logrotate now
+	  skips directories which are world writable or writable by group
+	  which is not "root" unless "su" directive is used.
+	- fixed CVE-2011-1098: race condition by creation of new files
+	- fixed possible shell injection when using "shred" directive (CVE-2011-1154)
+	- fixed escaping of file names within 'write state' action (CVE-2011-1155)
+	- better 'size' directive description
+	- fixed possible buffer-overflow when reading config files
+	- NetBSD/FreeBSD compilation fixes
+	- Solaris compilation fixes
+
+3.7.8 -> 3.7.9
+	- fix building on Solaris (patch by András Szilárd)
+	- don't copy config files on the stack -- mmap them instead
+	  (fixes segfaults with too large/invalid config files)
+	- symlinked conf file man page as requested by Fedora guidelines
+	  (thanks to Ivana Hutarova Varekova)
+	- cron script logrotate.cron redirects output to /dev/null
+	- added rotating (copying) non-writable, readable files
+	  (patch by Henrique Martins)
+	- fixed missingok problem with globs
+	  (taken from the Debian patches by Ted Percival 
+	   <ted@midg3t.net>)
+	- fixed bug when log files could be removed even there was
+	  some error in rotation process.
+	- allow setting size greater than 4.2GB in configuration file
+	- pass currently rotated file to postrotate/prerotate script
+	  in nosharedscripts mode
+	- added new TabooExts: ".disabled", ".dpkg-old", ".dpkg-dist",
+	  ".dpkg-new", ".cfsaved", ".ucf-old", ".ucf-dist", ".ucf-new"
+	  (taken from the Debian patches by Paul Martin <pm@debian.org>)
+	- Don't change utime atime/mtime when compressing files
+	  (taken from the Debian patches by Paul Martin <pm@debian.org>)
+	- Better *rotate scripts parser. (taken from the Debian patches)
+	- Allow 'include' directive in log file definitions
+
 3.7.7 -> 3.7.8
 	- do not exit on status file errors
 	- limit config file inclusion nesting

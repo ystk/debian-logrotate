@@ -17,6 +17,7 @@ genconfig() {
     input=test-config.$1.in
     output=test-config.$1
     sed "s,&DIR&,$PWD,g" < $input > $output
+    config_crc=$(md5sum $output)
 }
 
 createlog() {
@@ -117,6 +118,11 @@ checkoutput() {
 	    echo expected: \'$expected\'
 	    exit 2
 	fi
+	echo "$config_crc" | md5sum -c - 2>&1 > /dev/null
+	if [ $? != 0 ]; then
+		echo "config file $output has been altered: MD5 sum mismatch"
+		exit 3
+	fi
     done
 }
 
@@ -136,6 +142,7 @@ preptest() {
 # we don't want any stuff left from previous runs
 cleanup
 
+# ------------------------------- Test 1 -------------------------------------
 # Without a log file, no rotations should occur
 preptest test.log 1 2
 $RLR test-config.1 
@@ -170,6 +177,7 @@ EOF
 
 cleanup 1
 
+# ------------------------------- Test 2 -------------------------------------
 preptest test.log 2 3
 $RLR test-config.2 --force
 
@@ -197,6 +205,7 @@ EOF
 
 cleanup 3
 
+# ------------------------------- Test 3 -------------------------------------
 preptest test.log 3 1
 preptest test2.log 3 1
 $RLR test-config.3 --force
@@ -211,6 +220,7 @@ EOF
 
 cleanup 4
 
+# ------------------------------- Test 4 -------------------------------------
 preptest test.log 4 1
 preptest test2.log 4 1
 $RLR test-config.4 --force 
@@ -225,6 +235,7 @@ EOF
 
 cleanup 5
 
+# ------------------------------- Test 5 -------------------------------------
 preptest test.log 5 1
 preptest anothertest.log 5 1
 $RLR test-config.5 --force 
@@ -239,6 +250,7 @@ EOF
 
 cleanup 6
 
+# ------------------------------- Test 6 -------------------------------------
 preptest test.log 6 1
 preptest anothertest.log 6 1
 $RLR test-config.6 --force
@@ -253,6 +265,7 @@ EOF
 
 cleanup 7
 
+# ------------------------------- Test 7 -------------------------------------
 preptest test.log 7 1
 preptest anothertest.log 7 1
 
@@ -268,6 +281,7 @@ EOF
 
 cleanup 8
 
+# ------------------------------- Test 8 -------------------------------------
 preptest test.log 8 1 1
 $RLR test-config.8 --force
 
@@ -281,6 +295,7 @@ checkmail test.log zero
 
 cleanup 9
 
+# ------------------------------- Test 9 -------------------------------------
 preptest test.log 9 1 1
 $RLR test-config.9 --force
 
@@ -293,6 +308,7 @@ checkmail test.log zero
 
 cleanup 10
 
+# ------------------------------- Test 10 ------------------------------------
 preptest test.log 10 1
 $RLR test-config.10 --force
 
@@ -314,6 +330,7 @@ checkmail test.log.1 newfile
 
 cleanup 11
 
+# ------------------------------- Test 11 ------------------------------------
 preptest test.log 11 2 1
 $RLR test-config.11 --force
 
@@ -327,6 +344,7 @@ checkmail test.log first
 # check rotation into a directory given as a relative pathname
 cleanup 12
 
+# ------------------------------- Test 12 ------------------------------------
 preptest test.log 12 1 0
 rm -rf testdir
 mkdir testdir
@@ -342,6 +360,7 @@ rm -rf testdir
 # check rotation into a directory given as an absolute  pathname
 cleanup 13
 
+# ------------------------------- Test 13 ------------------------------------
 preptest test.log 13 1 0
 rm -rf testdir
 mkdir testdir
@@ -357,6 +376,7 @@ rm -rf testdir
 # sanity rotation check using dateext and dateformat
 cleanup 14
 
+# ------------------------------- Test 14 ------------------------------------
 preptest test.log 14 1 0
 
 $RLR test-config.14 --force
@@ -369,4 +389,42 @@ test.log.$DATESTRING 0 zero
 EOF
 
 rm -rf testdir
-cleanup
+
+# shred test
+cleanup 15
+
+# ------------------------------- Test 15 ------------------------------------
+preptest test.log 15 1 0
+$RLR test-config.15 --force
+
+# this rotation should use shred
+$RLR test-config.15 --force
+
+checkoutput <<EOF
+test.log 0
+test.log.1 0
+EOF
+
+cleanup 16
+
+# ------------------------------- Test 16 ------------------------------------
+preptest test.log 16 1 0
+# log with 1 byte should not be rotated
+echo "a" > test.log
+$RLR test-config.16
+
+if [ -f test.log.1 ]; then
+	echo "file $file does exist!"
+	exit 2
+fi
+
+# log with 4 bytes should be rotated
+echo "zero" > test.log
+$RLR test-config.16
+
+checkoutput <<EOF
+test.log 0
+test.log.1 0 zero
+EOF
+
+# cleanup
