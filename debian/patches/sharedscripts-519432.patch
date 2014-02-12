@@ -1,8 +1,8 @@
-Index: logrotate-3.7.8/logrotate.c
+Index: logrotate-3.8.1/logrotate.c
 ===================================================================
---- logrotate-3.7.8.orig/logrotate.c	2009-08-04 15:14:36.262021989 +0100
-+++ logrotate-3.7.8/logrotate.c	2009-08-04 15:15:10.038111310 +0100
-@@ -189,6 +189,42 @@
+--- logrotate-3.8.1.orig/logrotate.c	2011-12-05 16:40:09.932530558 +0000
++++ logrotate-3.8.1/logrotate.c	2011-12-05 16:40:17.796749416 +0000
+@@ -260,6 +260,42 @@
      return rc;
  }
  
@@ -45,11 +45,11 @@ Index: logrotate-3.7.8/logrotate.c
  int createOutputFile(char *fileName, int flags, struct stat *sb)
  {
      int fd;
-@@ -1300,18 +1336,22 @@
+@@ -1548,18 +1584,22 @@
  			"since no logs will be rotated\n");
  	    } else {
  		message(MESS_DEBUG, "running prerotate script\n");
--		if (runScript(log->pattern, log->pre)) {
+-		if (runScript(log->flags & LOG_FLAG_SHAREDSCRIPTS ? log->pattern : log->files[j], log->pre)) {
 -		    if (log->flags & LOG_FLAG_SHAREDSCRIPTS)
 +	        if (log->flags & LOG_FLAG_SHAREDSCRIPTS) {
 +		    if (runScriptMultiple(log->pattern, log->pre, rotNames, log->numFiles)) {
@@ -73,11 +73,11 @@ Index: logrotate-3.7.8/logrotate.c
  		}
  	    }
  	}
-@@ -1335,18 +1375,22 @@
+@@ -1583,18 +1623,22 @@
  			"since no logs were rotated\n");
  	    } else {
  		message(MESS_DEBUG, "running postrotate script\n");
--		if (runScript(log->pattern, log->post)) {
+-		if (runScript(log->flags & LOG_FLAG_SHAREDSCRIPTS ? log->pattern : log->files[j], log->post)) {
 -		    if (log->flags & LOG_FLAG_SHAREDSCRIPTS)
 +		if (log->flags & LOG_FLAG_SHAREDSCRIPTS) {
 +		    if (runScriptMultiple(log->pattern, log->post, rotNames, log->numFiles)) {

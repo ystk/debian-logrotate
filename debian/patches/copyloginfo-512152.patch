@@ -1,11 +1,11 @@
 shredcycles was not copied from outer blocks (eg. defaults) to inner 
 blocks. (Closes: #512152)
 
-Index: logrotate-3.7.7/config.c
+Index: logrotate-3.8.1/config.c
 ===================================================================
---- logrotate-3.7.7.orig/config.c	2009-01-18 00:44:19.727019849 +0000
-+++ logrotate-3.7.7/config.c	2009-01-18 00:46:15.495020657 +0000
-@@ -225,6 +225,7 @@
+--- logrotate-3.8.1.orig/config.c	2011-12-05 16:39:38.151646143 +0000
++++ logrotate-3.8.1/config.c	2011-12-05 16:40:13.868640111 +0000
+@@ -317,6 +317,7 @@
      if (from->compress_ext)
  	to->compress_ext = strdup(from->compress_ext);
      to->flags = from->flags;
