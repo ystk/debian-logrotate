@@ -2,8 +2,11 @@ Source: logrotate
 Section: admin
 Priority: important
 Maintainer: Paul Martin <pm@debian.org>
-Build-Depends: libpopt-dev, debhelper (>= 9), quilt, libselinux1-dev [linux-any]
-Standards-Version: 3.9.3
+Build-Depends: libpopt-dev, debhelper (>= 9),
+ libselinux1-dev [linux-any], libacl1-dev [linux-any]
+Vcs-Svn: http://svn.fedorahosted.org/svn/logrotate/
+Homepage: https://fedorahosted.org/logrotate/
+Standards-Version: 3.9.5
 
 Package: logrotate
 Architecture: any

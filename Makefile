@@ -13,11 +13,21 @@ SVNTAG = r$(subst .,-,$(VERSION))
 ifeq ($(WITH_SELINUX),yes)
 CFLAGS += -DWITH_SELINUX
 LOADLIBES += -lselinux
+# See pretest
+TEST_SELINUX=1
+else
+# See pretest
+TEST_SELINUX=0
 endif
 
 ifeq ($(WITH_ACL),yes)
 CFLAGS += -DWITH_ACL
 LOADLIBES += -lacl
+# See pretest
+TEST_ACL=1
+else
+# See pretest
+TEST_ACL=0
 endif
 
 # HP-UX using GCC
@@ -104,38 +114,47 @@ endif
 
 RCSVERSION = $(subst .,-,$(VERSION))
 
-all: $(TARGET)
+all: $(TARGET) pretest
 
 $(PROG): $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(PROG) core* .depend
+	rm -f ./test/test.ACL ./test/test.SELINUX ./test/error.log
 
 depend:
 	$(CPP) $(CFLAGS) -M $(SOURCES) > .depend
+
+# pretest create the file ./test/test.ACL with
+# 0 or 1 according to the WITH_ACL=yes presence.
+# The file will be used by ./test/test to decide
+# if to do the ACL tests or not.
+pretest:
+	echo "$(TEST_ACL)" > ./test/test.ACL ;
+	echo "$(TEST_SELINUX)" > ./test/test.SELINUX ;
 
 .PHONY : test
 test: $(TARGET)
 	(cd test; ./test)
 
 install:
-	[ -d $(PREFIX)/$(BINDIR) ] || mkdir -p $(PREFIX)/$(BINDIR)
-	[ -d $(PREFIX)/$(MANDIR) ] || mkdir -p $(PREFIX)/$(MANDIR)
-	[ -d $(PREFIX)/$(MANDIR)/man8 ] || mkdir -p $(PREFIX)/$(MANDIR)/man8
-	[ -d $(PREFIX)/$(MANDIR)/man5 ] || mkdir -p $(PREFIX)/$(MANDIR)/man5
+	[ -d $(PREFIX)$(BINDIR) ] || mkdir -p $(PREFIX)$(BINDIR)
+	[ -d $(PREFIX)$(MANDIR) ] || mkdir -p $(PREFIX)$(MANDIR)
+	[ -d $(PREFIX)$(MANDIR)/man8 ] || mkdir -p $(PREFIX)$(MANDIR)/man8
+	[ -d $(PREFIX)$(MANDIR)/man5 ] || mkdir -p $(PREFIX)$(MANDIR)/man5
 
 	if [ "$(OS_NAME)" = HP-UX ]; then \
-	$(INSTALL) $(PROG) $(PREFIX)/$(BINDIR) 0755 bin bin; \
-	$(INSTALL) $(MAN) $(PREFIX)/$(MANDIR)/man`echo $(MAN) | sed "s/.*\.//"` 0644 bin bin; \
-	$(INSTALL) $(MAN5) $(PREFIX)/$(MANDIR)/man`echo $(MAN5) | sed "s/.*\.//"` 0644 bin bin; \
+	$(INSTALL) $(PROG) $(PREFIX)$(BINDIR) 0755 bin bin; \
+	$(INSTALL) $(MAN) $(PREFIX)$(MANDIR)/man`echo $(MAN) | sed "s/.*\.//"` 0644 bin bin; \
+	$(INSTALL) $(MAN5) $(PREFIX)$(MANDIR)/man`echo $(MAN5) | sed "s/.*\.//"` 0644 bin bin; \
 	else if [ "$(OS_NAME)" = FreeBSD ]; then \
 	$(BSD_INSTALL_PROGRAM) $(PROG) $(BINDIR); \
 	$(BSD_INSTALL_MAN) $(MAN) $(MANDIR)/man`echo $(MAN) | sed "s/.*\.//"`/$(MAN); \
 	$(BSD_INSTALL_MAN) $(MAN5) $(MANDIR)/man`echo $(MAN5) | sed "s/.*\.//"`/$(MAN5); \
 	else \
-	$(INSTALL) -m 755 $(PROG) $(PREFIX)/$(BINDIR); \
-	$(INSTALL) -m 644 $(MAN) $(PREFIX)/$(MANDIR)/man`echo $(MAN) | sed "s/.*\.//"`/$(MAN); \
-	$(INSTALL) -m 644 $(MAN5) $(PREFIX)/$(MANDIR)/man`echo $(MAN5) | sed "s/.*\.//"`/$(MAN5); \
+	$(INSTALL) -m 755 $(PROG) $(PREFIX)$(BINDIR); \
+	$(INSTALL) -m 644 $(MAN) $(PREFIX)$(MANDIR)/man`echo $(MAN) | sed "s/.*\.//"`/$(MAN); \
+	$(INSTALL) -m 644 $(MAN5) $(PREFIX)$(MANDIR)/man`echo $(MAN5) | sed "s/.*\.//"`/$(MAN5); \
 	fi; fi
 
 co:

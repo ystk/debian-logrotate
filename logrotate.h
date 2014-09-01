@@ -33,15 +33,15 @@ struct logInfo {
     char **files;
     int numFiles;
     char *oldDir;
-    enum { ROT_DAYS, ROT_WEEKLY, ROT_MONTHLY, ROT_YEARLY, ROT_SIZE,
-	    ROT_FORCE } criterium;
+    enum { ROT_HOURLY, ROT_DAYS, ROT_WEEKLY, ROT_MONTHLY, ROT_YEARLY, ROT_SIZE
+            } criterium;
     unsigned long long threshhold;
 	unsigned long long maxsize;
     unsigned long long minsize;
     int rotateCount;
     int rotateAge;
     int logStart;
-    char *pre, *post, *first, *last;
+    char *pre, *post, *first, *last, *preremove;
     char *logAddress;
     char *extension;
     char *compress_prog;
@@ -67,7 +67,7 @@ extern int numLogs;
 extern int debug;
 
 int readAllConfigPaths(const char **paths);
-#if !defined(asprintf)
+#if !defined(asprintf) && !defined(_FORTIFY_SOURCE)
 int asprintf(char **string_ptr, const char *format, ...);
 #endif
 
